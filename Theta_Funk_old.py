@@ -153,7 +153,7 @@ def Thetta_Ombil_calc(a,b,c):
     Y_tau = lambda tau: k2*(theta_function11(Bou, Ro*tau)) / (mp.exp(Sigma*tau+eps)*theta_function11(Bou, Ro*tau+q/2.0) + mp.exp(-Sigma*tau-eps)*theta_function11(Bou, Ro*tau-q/2.0))
 
 
-    """print(f"омбилическая точка = {a*mp.sqrt((a ** 2 - b ** 2)/(a ** 2 - c ** 2)),0,c * mp.sqrt((b ** 2 - c ** 2)/(a ** 2 - c ** 2))}")
+    print(f"омбилическая точка = {a*mp.sqrt((a ** 2 - b ** 2)/(a ** 2 - c ** 2)),0,c * mp.sqrt((b ** 2 - c ** 2)/(a ** 2 - c ** 2))}")
 
     print(f"X(0) = {X_tau(0)}")
     print(f"Y(0) = {Y_tau(0)}")
@@ -166,12 +166,13 @@ def Thetta_Ombil_calc(a,b,c):
     print(f"Z(1) = {Z_tau(1)}")
 
     X,Y,Z= X_tau(1), Y_tau(1), Z_tau(1)
-    print(f"C1 = {X**2/a**2+Y**2/b**2+Z**2/c**2}")"""
+    print(f"C1 = {X**2/a**2+Y**2/b**2+Z**2/c**2}")
 
     return (round(mp.re(X_tau(0)), 3), round(mp.re(Y_tau(0)), 3), round(mp.re(Z_tau(0)), 3))
 
 Thetta_Ombil_calc(3,2,1)
 
+"""
 a_values = [3.0, 4.0, 10.0, 14.0, 13.0, 15.0, 20.0, 17.0, 21.0, 25.0]
 b_values = [2.0, 3.0, 6.0, 5.0, 7.0, 3.0, 10.0, 13.0, 14.0, 15.0]
 c_values = [1.0, 2.0, 3.0, 2.0, 5.0, 1.0, 1.0, 10.0, 4.0, 5.0]
@@ -202,3 +203,4 @@ print(df.to_string())
 # Сброс настроек (опционально)
 pd.reset_option('display.max_colwidth')
 pd.reset_option('display.expand_frame_repr')
+"""

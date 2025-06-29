@@ -1,7 +1,9 @@
 import math
 import numpy as np
 import time
+import Constants
 from scipy.optimize import minimize
+from scipy.optimize import fsolve
 def get_signs(x, y, z, d, l):
     signs = []
 
@@ -714,4 +716,88 @@ def ReCalc_XYZ_to_ZXY(Th, fi, d_Th, d_fi):
     d_Th_new = (ST*SF*d_fi - CT*CF*d_Th)/ST_new
     d_fi_new = - (ST*d_Th + CT_new*SF_new*d_Th_new) / (ST_new*CF_new)
     return  Th_new, fi_new, d_Th_new, d_fi_new
+
+
+import numpy as np
+from scipy.optimize import least_squares
+
+def Calc_angelError_single(y, a, b, c, d, ConstantsStart=None):
+    Th, fi, Alpha, D_Th, D_fi, D_Alpha = y
+
+    r = R_Calc(fi, Th, Alpha, a, b, c, d)
+    D_r = RVel_Calc(fi, Th, Alpha, r, D_fi, D_Th, D_Alpha, a, b, c, d)
+
+    X, Y, Z, T, D_X, D_Y, D_Z, D_T = ReCalc_Polar_to_Dec(Th, fi, Alpha, r, D_Th, D_fi, D_Alpha, D_r)
+
+    A1, B1, C1, D1 = X / a**2, Y / b**2, Z / c**2, 0
+    I = ConstantsStart['I'] / (X**2 / a**4 + Y**2 / b**4 + Z**2 / c**4)
+    H = ConstantsStart['H']
+
+    A2, B2, C2, D2 = 1.0 / a**2, 1.0 / b**2, 1.0 / c**2, 0
+    if d != 0:
+        D1 = T / d**2
+        D2 = 1.0 / d**2
+        I = ConstantsStart['I'] / (X ** 2 / a ** 4 + Y ** 2 / b ** 4 + Z ** 2 / c ** 4 + T ** 2 / d ** 4)
+    def equations(vars):
+        if d==0:
+            x, y, z = vars
+            t=0
+        else: x, y, z, t = vars
+
+        F1, F2, F3, F4 = Constants.Check_F_all(X, Y, Z, T, x, y, z, t, a**2, b**2, c**2, d**2)
+        eq1 = A1 * x + B1 * y + C1 * z + D1 * t
+        eq2 = A2 * x**2 + B2 * y**2 + C2 * z**2 + D2 * t**2 - I
+        eq3 = x**2 + y**2 + z**2 + t**2 - H
+        eq4 = F1 - ConstantsStart['F1']
+        eq5 = F2 - ConstantsStart['F2']
+        eq6 = F3 - ConstantsStart['F3']
+        return [eq1, eq2*1e10, eq3, eq4, eq5, eq6]
+    if d==0:initial_guess = [D_X, D_Y, D_Z]
+    else:initial_guess = [D_X, D_Y, D_Z, D_T]
+
+
+    try:
+        res = least_squares(
+            equations,
+            initial_guess,
+            method='trf',
+            xtol=1e-8,
+            ftol=1e-8,
+            gtol=1e-8,
+            max_nfev=500,
+            loss='linear',  # эквивалент обычной least squares
+            f_scale=1.0
+        )
+
+        if not res.success:
+            # Если решение не найдено, вернуть np.nan или начальное приближение
+            return np.nan
+        solution = res.x
+    except Exception as e:
+        # При ошибках в оптимизации тоже возвращаем np.nan
+        print(e)
+        return np.nan
+
+    def angle_between(v1, v2, degrees=False):
+        v1 = np.array(v1)
+        v2 = np.array(v2)
+        cos_theta = np.dot(v1, v2) / (np.linalg.norm(v1) * np.linalg.norm(v2))
+        #cos_theta = np.clip(cos_theta, -1.0, 1.0)
+        angle = np.arccos(cos_theta)
+        return np.degrees(angle) if degrees else angle
+
+    return angle_between(initial_guess, solution, degrees=False)
+
+
+def Calc_angelError_vectorized(Y, a, b, c, d, ConstantsStart=None):
+    # Y — numpy array shape (6, N)
+    results = []
+    print(Y.shape[1])
+    for i in range(Y.shape[1]):
+        print(i)
+        y_i = Y[:, i]
+        angle_error = Calc_angelError_single(y_i, a, b, c, d, ConstantsStart)
+        results.append(angle_error)
+    return np.array(results)
+
 

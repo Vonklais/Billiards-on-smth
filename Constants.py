@@ -29,27 +29,31 @@ def Check_H(X, Y, Z, T, dX, dY, dZ, dT, a1, a2, a3, a4, writeopt = False):
     return H
 
 def Check_F_all(X, Y, Z, T, dX, dY, dZ, dT, a1, a2, a3, a4, writeopt = False):
-    if a4 != 0:
-        F1 = dX ** 2 + (X * dY - Y * dX) ** 2 / (a1 - a2) + (X * dZ - Z * dX) ** 2 / (a1 - a3) + (X * dT - T * dX) ** 2 / (
-                    a1 - a4)
-        F2 = dY ** 2 + (Y * dX - X * dY) ** 2 / (a2 - a1) + (Y * dZ - Z * dY) ** 2 / (a2 - a3) + (Y * dT - T * dY) ** 2 / (
-                    a2 - a4)
-        F3 = dZ ** 2 + (Z * dX - X * dZ) ** 2 / (a3 - a1) + (Z * dY - Y * dZ) ** 2 / (a3 - a2) + (Z * dT - T * dZ) ** 2 / (
-                    a3 - a4)
-        F4 = dT ** 2 + (T * dX - X * dT) ** 2 / (a4 - a1) + (T * dY - Y * dT) ** 2 / (a4 - a2) + (T * dZ - Z * dT) ** 2 / (
-                    a4 - a3)
-        if writeopt == True:
-            print(f"F1 = {F1:.3f}, F2 = {F2:.3f}, F3 = {F3:.3f}, F4 = {F4:.3f}, Сумма = {F1+F2+F3+F4:.3f}")
-        F = np.array([F1, F2, F3, F4])
-        return F
-    elif a4 == 0:
-        F1 = dX ** 2 + (X * dY - Y * dX) ** 2 / (a1 - a2) + (X * dZ - Z * dX) ** 2 / (a1 - a3)
-        F2 = dY ** 2 + (Y * dX - X * dY) ** 2 / (a2 - a1) + (Y * dZ - Z * dY) ** 2 / (a2 - a3)
-        F3 = dZ ** 2 + (Z * dX - X * dZ) ** 2 / (a3 - a1) + (Z * dY - Y * dZ) ** 2 / (a3 - a2)
-        if writeopt == True:
-            print(f"F1 = {F1:.3f}, F2 = {F2:.3f}, F3 = {F3:.3f}, Сумма = {F1+F2+F3:.3f}")
-        F = np.array([F1, F2, F3, np.zeros_like(F1)])
-        return F
+    try:
+        if a4 != 0:
+            F1 = dX ** 2 + (X * dY - Y * dX) ** 2 / (a1 - a2) + (X * dZ - Z * dX) ** 2 / (a1 - a3) + (X * dT - T * dX) ** 2 / (
+                        a1 - a4)
+            F2 = dY ** 2 + (Y * dX - X * dY) ** 2 / (a2 - a1) + (Y * dZ - Z * dY) ** 2 / (a2 - a3) + (Y * dT - T * dY) ** 2 / (
+                        a2 - a4)
+            F3 = dZ ** 2 + (Z * dX - X * dZ) ** 2 / (a3 - a1) + (Z * dY - Y * dZ) ** 2 / (a3 - a2) + (Z * dT - T * dZ) ** 2 / (
+                        a3 - a4)
+            F4 = dT ** 2 + (T * dX - X * dT) ** 2 / (a4 - a1) + (T * dY - Y * dT) ** 2 / (a4 - a2) + (T * dZ - Z * dT) ** 2 / (
+                        a4 - a3)
+            if writeopt == True:
+                print(f"F1 = {F1:.3f}, F2 = {F2:.3f}, F3 = {F3:.3f}, F4 = {F4:.3f}, Сумма = {F1+F2+F3+F4:.3f}")
+            F = np.array([F1, F2, F3, F4])
+            return F
+        elif a4 == 0:
+            F1 = dX ** 2 + (X * dY - Y * dX) ** 2 / (a1 - a2) + (X * dZ - Z * dX) ** 2 / (a1 - a3)
+            F2 = dY ** 2 + (Y * dX - X * dY) ** 2 / (a2 - a1) + (Y * dZ - Z * dY) ** 2 / (a2 - a3)
+            F3 = dZ ** 2 + (Z * dX - X * dZ) ** 2 / (a3 - a1) + (Z * dY - Y * dZ) ** 2 / (a3 - a2)
+            if writeopt == True and np.isscalar(F1):
+                print(f"F1 = {F1:.3f}, F2 = {F2:.3f}, F3 = {F3:.3f}, Сумма = {F1 + F2 + F3:.3f}")
+            F = np.array([F1, F2, F3, np.zeros_like(F1)])
+            return F
+    except Exception as e:
+        print("Ошибка в Check_F_all:", e)
+        return np.array([np.zeros_like(X)] * 4)
 
 
 def Check_I(X, Y, Z, T, dX, dY, dZ, dT, a1, a2, a3, a4, writeopt = False):
@@ -101,3 +105,9 @@ def random_velocity_with_H_simple(X, Y, Z, a, b, c, H0):
     v = v / norm_v * math.sqrt(H0)
 
     return v[0], v[1], v[2]
+
+
+def I2(X, Y, Z, T, dX, dY, dZ, dT, a1, a2, a3, a4, writeopt = False):
+    I2 = (X ** 2 / a1 ** 3 + Y ** 2 / a2 ** 3 + Z ** 2 / a3 ** 3 + T ** 2 / a4 ** 3) * (
+                dX ** 2 / a1 + dY ** 2 / a2 + dZ ** 2 / a3 + dT ** 2 / a4)
+    return I2

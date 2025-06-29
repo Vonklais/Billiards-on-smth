@@ -37,7 +37,7 @@ def sph_muve(fig, ax, points, A, B):
     ConstDictStart = Constants.Check_All(X, Y, Z, 0, D_X, D_Y, D_Z, 0, a ** 2, b ** 2, c ** 2, 0, True)
     figs, axs = plt.subplots(3, 1, figsize=(8, 8), sharex=True)
     figs1, axs1 = plt.subplots(2, 1, figsize=(8, 8), sharex=True)
-    t_span = (0, 10000)
+    t_span = (0, 1000)
     fig.suptitle(
         f"Lagrange Spherical 3D RK Sphere\n"
         f"t = {t_span[1]}, a = {a}, b = {b}, c = {c}\n"
@@ -213,6 +213,9 @@ def Lagrange_Spherical_3D_RK_one(fig3d, ax3d, figgr, axgr, y0, Ell_Axes,t_span, 
 
 
 
+
+
+
 def Lagrange_Spherical_3D_RK(fig, ax, T_Final):
     global th, phi, alpha, th_dot, phi_dot, alpha_dot, a, b, c, d, l, l2, l3, l4, Check_reflection
     r = geometry.R_Calc(phi, th, 0, a, b, c, 0)
@@ -220,7 +223,8 @@ def Lagrange_Spherical_3D_RK(fig, ax, T_Final):
     X, Y, Z, T, D_X, D_Y, D_Z, D_T = geometry.ReCalc_Polar_to_Dec(th, phi, 0, r, th_dot, phi_dot, 0, r_dot)
     print("ConstDictStart")
     ConstDictStart = Constants.Check_All(X, Y, Z, 0, D_X, D_Y, D_Z, 0, a ** 2, b ** 2, c ** 2, 0, True)
-    figs, axs = plt.subplots(2, 1, figsize=(8, 8), sharex=True)
+    figs, axs = plt.subplots(2, 3, figsize=(12, 8), sharex=True, constrained_layout=True)
+
     t_span = (0, T_Final)
     fig.suptitle(
         f"Lagrange Spherical 3D RK\n"
@@ -237,25 +241,6 @@ def Lagrange_Spherical_3D_RK(fig, ax, T_Final):
     #y_full, t_full = RungeKut.RK_Lagrange_Calc(y0, a, b, c, 0, [l, l2, l3, l4], t_span, t_eval_step, reflections_enabled,ConstDictStart)
     y_full1, t_full1 = RungeKut.RK_Lagrange_Calc(y0, a, b, c, 0, [l, l2, l3, l4], t_span, t_eval_step, reflections_enabled)
     y_full2, t_full2 = RungeKut.RK_Lagrange_Calc(y0, a, b, c, 0, [l, l2, l3, l4], t_span, t_eval_step, reflections_enabled, ConstDictStart, "Normirovka")
-
-    """    #Коррекция выражением
-    th, phi, alpha, th_dot, phi_dot, alpha_dot = y_full[0], y_full[1], y_full[2], y_full[3], y_full[4], y_full[5]
-    th_dot = geometry.Hamiltonian_Correct(th, phi, alpha, th_dot, phi_dot, alpha_dot, a, b, c, 0, ConstDictStart)
-    r = geometry.R_Calc(phi, th, 0, a, b, c, d)
-    D_r = geometry.RVel_Calc(phi, th, 0, r, phi_dot, th_dot, 0, a, b, c, 0)
-    X, Y, Z, T, D_X, D_Y, D_Z, D_T = geometry.ReCalc_Polar_to_Dec(th, phi, 0, r, th_dot, phi_dot, 0, D_r)
-    ConstDict = Constants.Check_All(X, Y, Z, 0, D_X, D_Y, D_Z, 0, a ** 2, b ** 2, c ** 2, 0)
-    ConstDict['I'] *= 1e10
-    """
-
-
-    # Без коррекции
-    th1, phi1, alpha1, th_dot1, phi_dot1, alpha_dot1 = y_full1[0], y_full1[1], y_full1[2], y_full1[3], y_full1[4], y_full1[5]
-    r1 = geometry.R_Calc(phi1, th1, 0, a, b, c, d)
-    D_r1 = geometry.RVel_Calc(phi1, th1, 0, r1, phi_dot1, th_dot1, 0, a, b, c, 0)
-    X1, Y1, Z1, T1, D_X1, D_Y1, D_Z1, D_T1 = geometry.ReCalc_Polar_to_Dec(th1, phi1, 0, r1, th_dot1, phi_dot1, 0, D_r1)
-    ConstDict1 = Constants.Check_All(X1, Y1, Z1, 0, D_X1, D_Y1, D_Z1, 0, a ** 2, b ** 2, c ** 2, 0)
-    ConstDict1['I'] *= 1e10
 
     # Коррекция нормировкой
     th2, phi2, alpha2, th_dot2, phi_dot2, alpha_dot2 = y_full2[0], y_full2[1], y_full2[2], y_full2[3], y_full2[4], y_full2[5]
@@ -304,6 +289,7 @@ def Lagrange_Spherical_3D_RK(fig, ax, T_Final):
             y0rand[3] = dth[len(dth) - i - 1]
             Lagrange_Spherical_3D_RK_one(fig, ax, figs, axs, y0rand, t_span, t_eval_step, "Normirovka", color)
     """
+    """
     Constants_max_Diff = {
         'C1': max(ConstDict1['C1']) - min(ConstDict1['C1']),
         'C2': max(ConstDict1['C2']) - min(ConstDict1['C2']),
@@ -324,22 +310,22 @@ def Lagrange_Spherical_3D_RK(fig, ax, T_Final):
         ["F2", round(ConstDict1['F2'][0], 2), round(ConstDict1['F2'][-1], 2), round(Constants_max_Diff['F2'], 2)],
         ["F3", round(ConstDict1['F3'][0], 2), round(ConstDict1['F3'][-1], 2), round(Constants_max_Diff['F3'], 2)]
     ]
-
+    """
 
     #ax.plot(X, Y, Z, label='Траектория corr', color='b')
-    ax.plot(X1, Y1, Z1, label='Траектория no corr', color='g')
+    #ax.plot(X1, Y1, Z1, label='Траектория no corr', color='g')
     ax.plot(X2, Y2, Z2, label='Траектория нормировка', color='violet')
     ax.set_box_aspect([a, b, c])
     plt.figure(fig.number)
-    table = Graph.plot_table(fig, ax, TableDate)
+    #table = Graph.plot_table(fig, ax, TableDate)
     # Обновляем график
     plt.draw()
-    plt.figure(figs.number)
+
 
 
     H_values = geometry.H_Calc(th, phi, 0, 0, phi_dot, 0, a, b, c, d)
     H_condition = H_values > ConstDictStart['H']
-    highlight_indices = np.where(H_condition)[0]
+    #highlight_indices = np.where(H_condition)[0]
 
 
     # Первый график: I от времени
@@ -351,30 +337,92 @@ def Lagrange_Spherical_3D_RK(fig, ax, T_Final):
         color='red',
         label='H > H₀',
         zorder=3  # Чтобы точки были поверх линии
-    )"""
+    )
 
-    axs[0].plot(t_full1, ConstDict1['I'], label='no corr', color='green')
-    axs[0].plot(t_full2, ConstDict2['I'], label='Norm corr', color='violet')
-    axs[0].plot(t_full1, np.full_like(t_full1, ConstDictStart['I'] * 1e10), label='Start', color='red')
-    axs[0].set_title(f'Значение интегралов I от времени, шаг = {t_eval_step}')
-    axs[0].set_ylabel('Значение I')
-    axs[0].legend()
-    axs[0].grid(True)
+    #axs[0].plot(t_full1, ConstDict1['I'], label='no corr', color='green')
+    axs[0][0].plot(t_full2, ConstDict2['I'], label='Norm corr', color='violet')
+    axs[0][0].plot(t_full1, np.full_like(t_full1, ConstDictStart['I'] * 1e10), label='Start', color='red')
+    axs[0][0].set_title(f'Значение интегралов I от времени, шаг = {t_eval_step}')
+    axs[0][0].set_ylabel('Значение I')
+    axs[0][0].legend()
+    axs[0][0].grid(True)
 
     # Второй график: H от времени
     #axs[1].plot(t_full, ConstDict['H'], label='corr', color='blue')
-    axs[1].plot(t_full1, ConstDict1['H'], label='no corr', color='green')
-    axs[1].plot(t_full2, ConstDict2['H'], label='Norm corr', color='violet')
-    axs[1].set_title(f'Значение интегралов H от времени, шаг = {t_eval_step}')
-    axs[1].set_xlabel('Время t')
-    axs[1].set_ylabel('Значение H')
-    axs[1].legend()
-    axs[1].grid(True)
+    #axs[1].plot(t_full1, ConstDict1['H'], label='no corr', color='green')
+    y_full2[2], y_full2[5] = 0, 0
+    Angel_mass = geometry.Calc_angelError_vectorized(y_full2, a, b, c, d, ConstDictStart)
+    axs[1][0].plot(t_full2, Angel_mass, label='Norm corr', color='violet')
+    axs[1][0].set_title(f'Значение угла ошибки от времени, шаг = {t_eval_step}')
+    axs[1][0].set_xlabel('Время t')
+    axs[1][0].set_ylabel('Значение Угла')
+    axs[1][0].legend()
+    axs[1][0].grid(True)
+
+    axs[0][1].plot(t_full2, ConstDict2['F1'], label='Norm corr', color='violet')
+    axs[0][1].plot(t_full1, np.full_like(t_full1, ConstDictStart['F1']), label='Start', color='red')
+    axs[0][1].set_title(f'Значение интеграла F1 от времени, шаг = {t_eval_step}')
+    axs[0][1].set_xlabel('Время t')
+    axs[0][1].set_ylabel('Значение F1')
+    axs[0][1].legend()
+    axs[0][1].grid(True)
+
+    axs[0][2].plot(t_full2, ConstDict2['F2'], label='Norm corr', color='violet')
+    axs[0][2].plot(t_full1, np.full_like(t_full1, ConstDictStart['F2']), label='Start', color='red')
+    axs[0][2].set_title(f'Значение интеграла F2 от времени, шаг = {t_eval_step}')
+    axs[0][2].set_xlabel('Время t')
+    axs[0][2].set_ylabel('Значение F2')
+    axs[0][2].legend()
+    axs[0][2].grid(True)
+
+    axs[1][1].plot(t_full2, ConstDict2['F3'], label='Norm corr', color='violet')
+    axs[1][1].plot(t_full1, np.full_like(t_full1, ConstDictStart['F3']), label='Start', color='red')
+    axs[1][1].set_title(f'Значение интеграла F3 от времени, шаг = {t_eval_step}')
+    axs[1][1].set_xlabel('Время t')
+    axs[1][1].set_ylabel('Значение F3')
+    axs[1][1].legend()
+    axs[1][1].grid(True)
+
+    axs[1][2].plot(t_full2, ConstDict2['F4'], label='Norm corr', color='violet')
+    axs[1][2].plot(t_full1, np.full_like(t_full1, ConstDictStart['F4']), label='Start', color='red')
+    axs[1][2].set_title(f'Значение интеграла F4 от времени, шаг = {t_eval_step}')
+    axs[1][2].set_xlabel('Время t')
+    axs[1][2].set_ylabel('Значение F4')
+    axs[1][2].legend()
+    axs[1][2].grid(True)
+
+    figs2, axs2 = plt.subplots(1, 1, figsize=(8, 8), sharex=True)
+    plt.figure(figs2.number)
+
+    def Temp(y):
+        Th, fi, Alpha, D_Th, D_fi, D_Alpha = y
+        r = geometry.R_Calc(fi, Th, Alpha, a, b, c, d)
+        D_r = geometry.RVel_Calc(fi, Th, Alpha, r, D_fi, D_Th, D_Alpha, a, b, c, d)
+
+        X, Y, Z, T, D_X, D_Y, D_Z, D_T = geometry.ReCalc_Polar_to_Dec(Th, fi, Alpha, r, D_Th, D_fi, D_Alpha, D_r)
+
+        Xomb = a * np.sqrt((a ** 2 - b ** 2)/(a ** 2 - c ** 2))
+        Zomb = c * np.sqrt((b ** 2 - c ** 2)/(a ** 2 - c ** 2))
+
+        r1 = np.sqrt((X - Xomb) ** 2 + (Y) ** 2 + (Z - Zomb) ** 2)
+        r2 = np.sqrt((X + Xomb) ** 2 + (Y) ** 2 + (Z - Zomb) ** 2)
+        r3 = np.sqrt((X - Xomb) ** 2 + (Y) ** 2 + (Z + Zomb) ** 2)
+        r4 = np.sqrt((X + Xomb) ** 2 + (Y) ** 2 + (Z + Zomb) ** 2)
+        return np.minimum.reduce([r1, r2, r3, r4])
+
+    axs2.plot(t_full2, Temp(y_full2), label='Norm corr', color='violet')
+    axs2.set_title(f'расстояние до омбилической точки, шаг = {t_eval_step}')
+    axs2.set_ylabel('R')
+    axs2.legend()
+    axs2.grid(True)
+
 
     # Автоматическая настройка
     plt.tight_layout()
     plt.show()
+    """
 
+    Graph.Plot_Graph(y_full2, t_full2, ConstDictStart, ConstDict2, a, b, c, d)
 
 
 def Lagrange_Spherical_4D_RK(fig, ax, T_Final):
@@ -384,7 +432,6 @@ def Lagrange_Spherical_4D_RK(fig, ax, T_Final):
     X, Y, Z, T, D_X, D_Y, D_Z, D_T = geometry.ReCalc_Polar_to_Dec(th, phi, 0, r, th_dot, phi_dot, 0, r_dot)
     print("ConstDictStart")
     ConstDictStart = Constants.Check_All(X, Y, Z, 0, D_X, D_Y, D_Z, 0, a ** 2, b ** 2, c ** 2, 0, True)
-    figs, axs = plt.subplots(2, 1, figsize=(8, 8), sharex=True)
     t_span = (0, T_Final)
     fig.suptitle(
         f"Lagrange Spherical 4D RK\n"
@@ -394,40 +441,25 @@ def Lagrange_Spherical_4D_RK(fig, ax, T_Final):
         f"th_dot = {th_dot: .3f}, phi_dot = {phi_dot: .3f}, alpha_dot = {alpha_dot:.3f}"
     )
 
-    t_eval_step = 0.01
+    t_eval_step = 0.1
     y0 = [th, phi, alpha, th_dot, phi_dot, alpha_dot]
     figs, axs = plt.subplots(2, 1, figsize=(8, 8), sharex=True)
     Ell_Axes = [a,b,c,d]
 
-
-    y_full, t_full = RungeKut.RK_Lagrange_Calc(y0, a, b, c, d, [l, l2, l3, l4], t_span, t_eval_step, reflections_enabled)
+    # Коррекция нормировкой
+    y_full, t_full = RungeKut.RK_Lagrange_Calc(y0, a, b, c, d, [l, l2, l3, l4], t_span, t_eval_step, reflections_enabled, ConstDictStart,"Normirovka")
     th, phi, alpha, th_dot, phi_dot, alpha_dot = y_full[0], y_full[1], y_full[2], y_full[3], y_full[4], y_full[5]
-    print(y_full)
+    H_now = geometry.H_Calc(th, phi, alpha, th_dot, phi_dot, alpha_dot, a, b, c, d)
+    k = ConstDictStart['H'] / H_now
+    print(k)
+    th_dot *= np.sqrt(k)
+    phi_dot *= np.sqrt(k)
+    alpha_dot *= np.sqrt(k)
     r = geometry.R_Calc(phi, th, alpha, a, b, c, d)
     D_r = geometry.RVel_Calc(phi, th, alpha, r, phi_dot, th_dot, alpha_dot, a, b, c, d)
     X, Y, Z, T, D_X, D_Y, D_Z, D_T = geometry.ReCalc_Polar_to_Dec(th, phi, alpha, r, th_dot, phi_dot, alpha_dot, D_r)
     ConstDict = Constants.Check_All(X, Y, Z, T, D_X, D_Y, D_Z, D_T, a ** 2, b ** 2, c ** 2, d ** 2)
     ConstDict['I'] *= 1e10
-    Constants_max_Diff = {
-        'C1': max(ConstDict['C1']) - min(ConstDict['C1']),
-        'C2': max(ConstDict['C2']) - min(ConstDict['C2']),
-        'H': max(ConstDict['H']) - min(ConstDict['H']),
-        'I': max(ConstDict['I']) - min(ConstDict['I']),
-        'F1': max(ConstDict['F1']) - min(ConstDict['F1']),
-        'F2': max(ConstDict['F2']) - min(ConstDict['F2']),
-        'F3': max(ConstDict['F3']) - min(ConstDict['F3']),
-        'F4': max(ConstDict['F4']) - min(ConstDict['F4'])
-    }
-    TableDate = [
-        ["Константа", "В начале", "В конце", "МаксРазн"],
-        ["C1", round(ConstDict['C1'][0], 2), round(ConstDict['C1'][-1], 2), round(Constants_max_Diff['C1'], 2)],
-        ["C2", round(ConstDict['C2'][0], 2), round(ConstDict['C2'][-1], 2), round(Constants_max_Diff['C2'], 2)],
-        ["H", round(ConstDict['H'][0], 2), round(ConstDict['H'][-1], 2), round(Constants_max_Diff['H'], 2)],
-        ["I", round(ConstDict['I'][0], 2), round(ConstDict['I'][-1], 2), round(Constants_max_Diff['I'], 2)],
-        ["F1", round(ConstDict['F1'][0], 2), round(ConstDict['F1'][-1], 2), round(Constants_max_Diff['F1'], 2)],
-        ["F2", round(ConstDict['F2'][0], 2), round(ConstDict['F2'][-1], 2), round(Constants_max_Diff['F2'], 2)],
-        ["F3", round(ConstDict['F3'][0], 2), round(ConstDict['F3'][-1], 2), round(Constants_max_Diff['F3'], 2)]
-    ]
 
     # Находим точки, где T меняет знак
     sign_changes = np.where(np.diff(np.sign(T)))[0] + 1
@@ -448,7 +480,6 @@ def Lagrange_Spherical_4D_RK(fig, ax, T_Final):
 
     ax.set_box_aspect([a, b, c])
     plt.figure(fig.number)
-    table = Graph.plot_table(fig, ax, TableDate)
     # Обновляем график
     plt.draw()
     plt.figure(figs.number)
@@ -470,8 +501,8 @@ def Lagrange_Spherical_4D_RK(fig, ax, T_Final):
 
     # Автоматическая настройка
     plt.tight_layout()
-    plt.show()
-
+    plt.draw()
+    Graph.Plot_Graph(y_full, t_full, ConstDictStart, ConstDict, a, b, c, d)
 
 
 

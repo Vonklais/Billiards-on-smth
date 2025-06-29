@@ -2,6 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import math
 import Constants
+import geometry
 
 # Функция для обновления данных в таблице
 def update_table_data(table, X, D_X, Y, D_Y, Z, D_Z, T, D_T, a, b, c, d, ConstDictStart, DMaxDict):
@@ -173,3 +174,110 @@ def plot_ellipsoid(a, b, c, l, opt):
     ax.set_box_aspect([1, 1, 1])  # Масштаб по осям
 
     return fig, ax  # Возвращаем фигуру и ось
+
+
+def Plot_Graph(y, t, ConstDictStart, ConstDict, a, b, c, d):
+
+    """
+    Функция для построения графиков значений интегралов и угла ошибки от времени.
+    :param y: решение системы дифференциальных уравнений, состоящее из шести элементов
+    :param t: время
+    :param ConstDictStart: словарь с начальными значениями констант
+    :param ConstDict: словарь с текущими значениями констант(если не известен - передайте 0)
+    :param a, b, c, d: параметры эллипсоида,  трёхмерном случае передайте d=0
+    :return: рисует графики отклонений интегралов и угла от времени для решения y(t)
+    """
+    if d==0:
+        y[2], y[5] = 0, 0
+    Th, fi, Alpha, D_Th, D_fi, D_Alpha = y
+
+    figs, axs = plt.subplots(2, 3, figsize=(12, 8), sharex=True, constrained_layout=True)
+
+    if ConstDict == 0:
+        r = geometry.R_Calc(fi, Th, Alpha, a, b, c, d)
+        D_r = geometry.RVel_Calc(fi, Th, Alpha, r, D_fi, D_Th, D_Alpha, a, b, c, d)
+
+        X, Y, Z, T, D_X, D_Y, D_Z, D_T = geometry.ReCalc_Polar_to_Dec(Th, fi, Alpha, r, D_Th, D_fi, D_Alpha, D_r)
+        ConstDict = Constants.Check_All(X, Y, Z, T, D_X, D_Y, D_Z, D_T, a ** 2, b ** 2, c ** 2, d**2)
+        ConstDict['I'] *= 1e10
+
+    axs[0][0].plot(t, ConstDict['I'], label='Norm corr', color='violet')
+    axs[0][0].plot(t, np.full_like(t, ConstDictStart['I'] * 1e10), label='Start', color='red')
+    axs[0][0].set_title(f'Значение интегралов I от времени')
+    axs[0][0].set_ylabel('Значение I')
+    axs[0][0].legend()
+    axs[0][0].grid(True)
+
+    # Второй график: H от времени
+    #axs[1].plot(t_full, ConstDict['H'], label='corr', color='blue')
+    #axs[1].plot(t_full1, ConstDict1['H'], label='no corr', color='green')
+    if d==0:
+        y[2], y[5] = 0, 0
+    Angel_mass = geometry.Calc_angelError_vectorized(y, a, b, c, d, ConstDictStart)
+    axs[1][0].plot(t, Angel_mass, label='Norm corr', color='violet')
+    axs[1][0].set_title(f'Значение угла ошибки от времени')
+    axs[1][0].set_xlabel('Время t')
+    axs[1][0].set_ylabel('Значение Угла')
+    axs[1][0].legend()
+    axs[1][0].grid(True)
+
+    axs[0][1].plot(t, ConstDict['F1'], label='Norm corr', color='violet')
+    axs[0][1].plot(t, np.full_like(t, ConstDictStart['F1']), label='Start', color='red')
+    axs[0][1].set_title(f'Значение интеграла F1 от времени')
+    axs[0][1].set_xlabel('Время t')
+    axs[0][1].set_ylabel('Значение F1')
+    axs[0][1].legend()
+    axs[0][1].grid(True)
+
+    axs[0][2].plot(t, ConstDict['F2'], label='Norm corr', color='violet')
+    axs[0][2].plot(t, np.full_like(t, ConstDictStart['F2']), label='Start', color='red')
+    axs[0][2].set_title(f'Значение интеграла F2 от времени')
+    axs[0][2].set_xlabel('Время t')
+    axs[0][2].set_ylabel('Значение F2')
+    axs[0][2].legend()
+    axs[0][2].grid(True)
+
+    axs[1][1].plot(t, ConstDict['F3'], label='Norm corr', color='violet')
+    axs[1][1].plot(t, np.full_like(t, ConstDictStart['F3']), label='Start', color='red')
+    axs[1][1].set_title(f'Значение интеграла F3 от времени')
+    axs[1][1].set_xlabel('Время t')
+    axs[1][1].set_ylabel('Значение F3')
+    axs[1][1].legend()
+    axs[1][1].grid(True)
+
+    axs[1][2].plot(t, ConstDict['F4'], label='Norm corr', color='violet')
+    axs[1][2].plot(t, np.full_like(t, ConstDictStart['F4']), label='Start', color='red')
+    axs[1][2].set_title(f'Значение интеграла F4 от времени')
+    axs[1][2].set_xlabel('Время t')
+    axs[1][2].set_ylabel('Значение F4')
+    axs[1][2].legend()
+    axs[1][2].grid(True)
+
+    figs2, axs2 = plt.subplots(1, 1, figsize=(8, 8), sharex=True)
+    plt.figure(figs2.number)
+
+    def Temp(y):
+        Th, fi, Alpha, D_Th, D_fi, D_Alpha = y
+        r = geometry.R_Calc(fi, Th, Alpha, a, b, c, d)
+        D_r = geometry.RVel_Calc(fi, Th, Alpha, r, D_fi, D_Th, D_Alpha, a, b, c, d)
+
+        X, Y, Z, T, D_X, D_Y, D_Z, D_T = geometry.ReCalc_Polar_to_Dec(Th, fi, Alpha, r, D_Th, D_fi, D_Alpha, D_r)
+
+        Xomb = a * np.sqrt((a ** 2 - b ** 2) / (a ** 2 - c ** 2))
+        Zomb = c * np.sqrt((b ** 2 - c ** 2) / (a ** 2 - c ** 2))
+
+        r1 = np.sqrt((X - Xomb) ** 2 + (Y) ** 2 + (Z - Zomb) ** 2)
+        r2 = np.sqrt((X + Xomb) ** 2 + (Y) ** 2 + (Z - Zomb) ** 2)
+        r3 = np.sqrt((X - Xomb) ** 2 + (Y) ** 2 + (Z + Zomb) ** 2)
+        r4 = np.sqrt((X + Xomb) ** 2 + (Y) ** 2 + (Z + Zomb) ** 2)
+        return np.minimum.reduce([r1, r2, r3, r4])
+
+    axs2.plot(t, Temp(y), label='Norm corr', color='violet')
+    axs2.set_title(f'расстояние до омбилической точки')
+    axs2.set_ylabel('R')
+    axs2.legend()
+    axs2.grid(True)
+
+    # Автоматическая настройка
+    plt.tight_layout()
+    plt.show()
