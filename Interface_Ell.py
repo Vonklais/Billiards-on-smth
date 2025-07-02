@@ -256,7 +256,7 @@ def Lagrange_Spherical_3D_RK(fig, ax, T_Final):
     ConstDict2 = Constants.Check_All(X2, Y2, Z2, 0, D_X2, D_Y2, D_Z2, 0, a ** 2, b ** 2, c ** 2, 0)
     ConstDict2['I'] *= 1e10
 
-    """
+    """ 
     Xrand, Yrand, Zrand = a*math.sqrt((a ** 2 - b ** 2)/(a ** 2 - c ** 2)),0,c * math.sqrt((b ** 2 - c ** 2)/(a ** 2 - c ** 2))
     Thrand, firand, Alpharand, Rrand, D_Thrand, D_firand, D_Alpharand, D_Rrand = geometry.ReCalc_Dec_to_Polar(Xrand, Yrand, Zrand, 0, 0, 0, 0, 0)
     y0rand = [Thrand, firand, 0, D_Thrand, D_firand, 0]

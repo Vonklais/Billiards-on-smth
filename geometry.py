@@ -801,3 +801,64 @@ def Calc_angelError_vectorized(Y, a, b, c, d, ConstantsStart=None):
     return np.array(results)
 
 
+def filter_axes_nonzero(X, axes):
+    axes = np.asarray(axes, dtype=float)
+    mask = np.abs(axes) > 0
+    X_filtered = X[:, mask]  # для массива точек
+    axes_filtered = axes[mask]
+    if axes_filtered.size == 0:
+        raise ValueError("Нет ненулевых полуосей")
+    return X_filtered, axes_filtered
+
+def principal_curvatures_ellipsoid_batch(X_points, axes):
+    """
+    X_points: массив точек, форма (m, n)
+    axes: полуоси, длина n
+    Возвращает массив главных кривизн для каждой точки shape (m, n-1_filtered)
+    """
+    X_points = np.asarray(X_points, dtype=float)
+    axes = np.asarray(axes, dtype=float)
+
+    # Фильтруем координаты по ненулевым полуосям
+    X_filtered, axes_filtered = filter_axes_nonzero(X_points, axes)
+    print(f"размерность системы = {X_filtered.shape[1]}, количество точек = {X_filtered.shape[0]}")
+    m, n = X_filtered.shape
+    result = []
+
+    for i in range(m):
+        x = X_filtered[i]
+        try:
+            k = principal_curvatures_ellipsoid_single_point(x, axes_filtered)
+            result.append(k)
+        except Exception as e:
+            print(f"Ошибка в точке {i}: {e}")
+            result.append(np.full(n - 1, np.nan))
+
+    return np.array(result)
+
+def principal_curvatures_ellipsoid_single_point(X, axes):
+    # Это твоя функция для одной точки, адаптированная из ранее обсуждённой
+    n = len(X)
+    val = np.sum((X / axes) ** 2)
+    if abs(val - 1) > 1e-6:
+        raise ValueError("Точка не лежит на поверхности эллипсоида")
+
+    gradF = 2 * X / (axes ** 2)
+    N = gradF / np.linalg.norm(gradF)
+    HessF = np.diag(2 / (axes ** 2))
+
+    basis = np.eye(n)
+    tangent_basis = []
+
+    for v in basis:
+        w = v - np.dot(v, N) * N
+        norm_w = np.linalg.norm(w)
+        if norm_w > 1e-10:
+            tangent_basis.append(w / norm_w)
+        if len(tangent_basis) == n - 1:
+            break
+
+    T_mat = np.column_stack(tangent_basis)
+    L = T_mat.T @ HessF @ T_mat / np.linalg.norm(gradF)
+    k = np.linalg.eigvalsh(L)
+    return k

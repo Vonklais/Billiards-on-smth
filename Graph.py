@@ -3,6 +3,8 @@ import numpy as np
 import math
 import Constants
 import geometry
+import Polygon
+
 
 # Функция для обновления данных в таблице
 def update_table_data(table, X, D_X, Y, D_Y, Z, D_Z, T, D_T, a, b, c, d, ConstDictStart, DMaxDict):
@@ -271,10 +273,58 @@ def Plot_Graph(y, t, ConstDictStart, ConstDict, a, b, c, d):
         r3 = np.sqrt((X - Xomb) ** 2 + (Y) ** 2 + (Z + Zomb) ** 2)
         r4 = np.sqrt((X + Xomb) ** 2 + (Y) ** 2 + (Z + Zomb) ** 2)
         return np.minimum.reduce([r1, r2, r3, r4])
+    def Curvmin(y):
+        Th, fi, Alpha, D_Th, D_fi, D_Alpha = y
+        r = geometry.R_Calc(fi, Th, Alpha, a, b, c, d)
+        D_r = geometry.RVel_Calc(fi, Th, Alpha, r, D_fi, D_Th, D_Alpha, a, b, c, d)
 
-    axs2.plot(t, Temp(y), label='Norm corr', color='violet')
-    axs2.set_title(f'расстояние до омбилической точки')
-    axs2.set_ylabel('R')
+        X, Y, Z, T, D_X, D_Y, D_Z, D_T = geometry.ReCalc_Polar_to_Dec(Th, fi, Alpha, r, D_Th, D_fi, D_Alpha, D_r)
+        points = np.column_stack((X, Y, Z, T))
+        curvatures = geometry.principal_curvatures_ellipsoid_batch(points, [a, b, c, d])
+
+        m, k = curvatures.shape
+        min_diffs = np.empty(m)
+
+        for idx in range(m):
+            k_vec = curvatures[idx]
+            diffs = np.abs(k_vec[:, None] - k_vec[None, :])  # матрица |k_i - k_j|
+            # убираем диагональ (разности с самим собой)
+            diffs[np.diag_indices(k)] = np.inf
+            min_diffs[idx] = diffs.min()
+        return min_diffs
+    def Curv(y):
+        Th, fi, Alpha, D_Th, D_fi, D_Alpha = y
+        r = geometry.R_Calc(fi, Th, Alpha, a, b, c, d)
+        D_r = geometry.RVel_Calc(fi, Th, Alpha, r, D_fi, D_Th, D_Alpha, a, b, c, d)
+
+        X, Y, Z, T, D_X, D_Y, D_Z, D_T = geometry.ReCalc_Polar_to_Dec(Th, fi, Alpha, r, D_Th, D_fi, D_Alpha, D_r)
+        points = np.column_stack((X, Y, Z, T))
+
+
+        curvatures, errors = Polygon.principal_curvatures_ellipsoid_batch(points, [a, b, c, d])
+        print("Главные кривизны:\n", curvatures)
+
+        m, k = curvatures.shape
+        min_diffs = np.empty(m)
+
+        for idx in range(m):
+            k_vec = curvatures[idx]
+            diffs = np.abs(k_vec[:, None] - k_vec[None, :])  # матрица |k_i - k_j|
+            # убираем диагональ (разности с самим собой)
+            diffs[np.diag_indices(k)] = np.inf
+            min_diffs[idx] = diffs.min()
+        return min_diffs
+
+
+    """curvatures = Curv(y)  # shape (m, k)
+
+    for i in range(curvatures.shape[1]):
+        axs2.plot(t, curvatures[:, i], label=f'k{i + 1}')"""
+
+    axs2.plot(t, Curv(y), label='Norm corr', color='violet')
+
+    axs2.set_title(f'минимальная разность между кривизнами от времени')
+    axs2.set_ylabel('diff')
     axs2.legend()
     axs2.grid(True)
 
