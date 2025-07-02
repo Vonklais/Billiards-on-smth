@@ -427,11 +427,11 @@ def Lagrange_Spherical_3D_RK(fig, ax, T_Final):
 
 def Lagrange_Spherical_4D_RK(fig, ax, T_Final):
     global th, phi, alpha, th_dot, phi_dot, alpha_dot, a, b, c, d, l, l2, l3, l4, Check_reflection
-    r = geometry.R_Calc(phi, th, 0, a, b, c, 0)
-    r_dot = geometry.RVel_Calc(phi, th, 0, r, phi_dot, th_dot, 0, a, b, c, 0)
-    X, Y, Z, T, D_X, D_Y, D_Z, D_T = geometry.ReCalc_Polar_to_Dec(th, phi, 0, r, th_dot, phi_dot, 0, r_dot)
+    r = geometry.R_Calc(phi, th, alpha, a, b, c, d)
+    r_dot = geometry.RVel_Calc(phi, th, alpha, r, phi_dot, th_dot, alpha_dot, a, b, c, d)
+    X, Y, Z, T, D_X, D_Y, D_Z, D_T = geometry.ReCalc_Polar_to_Dec(th, phi, alpha, r, th_dot, phi_dot, alpha_dot, r_dot)
     print("ConstDictStart")
-    ConstDictStart = Constants.Check_All(X, Y, Z, 0, D_X, D_Y, D_Z, 0, a ** 2, b ** 2, c ** 2, 0, True)
+    ConstDictStart = Constants.Check_All(X, Y, Z, T, D_X, D_Y, D_Z, D_T, a ** 2, b ** 2, c ** 2, d ** 2, True)
     t_span = (0, T_Final)
     fig.suptitle(
         f"Lagrange Spherical 4D RK\n"
