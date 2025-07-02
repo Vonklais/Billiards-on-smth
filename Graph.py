@@ -3,7 +3,7 @@ import numpy as np
 import math
 import Constants
 import geometry
-import Polygon
+import Curves
 
 
 # Функция для обновления данных в таблице
@@ -301,7 +301,7 @@ def Plot_Graph(y, t, ConstDictStart, ConstDict, a, b, c, d):
         points = np.column_stack((X, Y, Z, T))
 
 
-        curvatures, errors = Polygon.principal_curvatures_ellipsoid_batch(points, [a, b, c, d])
+        curvatures, errors = Curves.principal_curvatures_ellipsoid_batch(points, [a, b, c, d])
         print("Главные кривизны:\n", curvatures)
 
         m, k = curvatures.shape
